@@ -1,8 +1,7 @@
-# damon/memcached
+# damon/memcached:1.4.20
 FROM debian:jessie
 
 # Install build needs
-# RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 RUN apt-get update \
     && apt-get install -y \
           build-essential \
