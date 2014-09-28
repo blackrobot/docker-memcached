@@ -1,13 +1,31 @@
-# Pull base image.
-FROM damon/base
+# damon/memcached
+FROM debian:jessie
 
-# Install Memcached
-RUN DEBIAN_FRONTEND=noninteractive apt-get install -yqq memcached libmemcached-dev
+# Install build needs
+# RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+RUN apt-get update \
+    && apt-get install -y \
+          build-essential \
+          libevent-dev \
+          curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Amount of memory to use
-ENV MEMORY_RESERVE 512
+ENV MEMCACHED_VERSION 1.4.20
 
-# Expose the memcached port
+# Download and install memcached
+RUN mkdir /tmp/memcached \
+    && cd /tmp/memcached \
+    && curl -SL "http://memcached.org/files/memcached-$MEMCACHED_VERSION.tar.gz" \
+         | tar zx --strip-components=1 \
+    && ./configure \
+    && make \
+    && make install \
+    && cd / \
+    && rm -Rf /tmp/memcached*
+
+# The default memcached port
 EXPOSE 11211
 
-CMD /usr/bin/memcached -v -p 11211 -u nobody -m $MEMORY_RESERVE
+ENTRYPOINT ["/usr/local/bin/memcached"]
+CMD ["-u", "root", "-v"]
